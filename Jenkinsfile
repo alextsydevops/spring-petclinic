@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('alextsydevops-dockerhub-credentials')
+    }
 
     stages {
         stage('CHECKOUT') {
@@ -14,9 +17,15 @@ pipeline {
         }
         stage('CREATE ARTIFACT') {
             steps {
-                sh 'docker image build -t alextsydevops/spring-petclinic:v$BUILD_NUMBER'
-                sh 'docker image ls -la'
+                sh 'docker image build -t alextsydevops/spring-petclinic:latest -t alextsydevops/spring-petclinic:v$BUILD_NUMBER .'
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                sh 'docker push --all-tags alextsydevops/spring-petclinic'
             }
         }
+        }
+        post {
+            always {
+                sh 'docker logout'
+            }
         }
 }
