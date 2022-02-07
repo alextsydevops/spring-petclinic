@@ -1,0 +1,19 @@
+- 
+  hosts: dev_group
+  become: True
+  tasks:
+    - name: Install Python pip
+      yum:
+        name: python-pip
+        state: present
+    - name: Install docker-py Python module
+      pip:
+        name: docker-py
+        state: present
+    - name: Start the container
+      docker_container:
+        name: spring-petclinic-app
+        image: "alextsydevops/spring-petclinic:{{DOCKER_TAG}}"
+        state: started
+        published_ports:
+          - "8080:8080"

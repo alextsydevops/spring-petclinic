@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('alextsydevops-dockerhub-credentials')
+    }
+
+    stages {
+        stage('CHECKOUT') {
+            steps {
+                git branch: 'main', url: 'https://github.com/alextsydevops/spring-petclinic'
+            }
+        }
+        stage('BUILD') {
+            steps {
+                sh "./mvnw package"
+            }
+        }
+        stage('CREATE ARTIFACT') {
+            steps {
+                sh 'docker image build -t alextsydevops/spring-petclinic:latest -t alextsydevops/spring-petclinic:v$BUILD_NUMBER .'
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                sh 'docker push --all-tags alextsydevops/spring-petclinic'
+            }
+        }
+        stage('DEPLOY') {
+            steps {
+                sshagent(['java-spring-app-dev-server']) {
+                    sh "ssh -o StrictHostKeyChecking=no ec2-user@ec2-18-192-61-199.eu-central-1.compute.amazonaws.com 'docker container run -d -p 8080:8080 --name spring-petclinic alextsydevops/spring-petclinic:latest'"
+                }
+            }
+        }
+        }
+        post {
+            always {
+                sh 'docker logout'
+            }
+        }
+}
