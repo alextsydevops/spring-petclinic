@@ -11,7 +11,12 @@
       yum:
         name: docker
         state: present
-      notify: docker service
+
+    - name: Docker service start
+      service:
+        name: docker
+        state: started
+        enabled: yes
 
     - name: Install docker-py Python module
       pip:
@@ -25,11 +30,3 @@
         state: started
         published_ports:
           - "8080:8080"
-
-  handlers:
-    - name: docker service
-      service:
-        name: docker
-        state: started
-        enabled: yes
-      listen: docker service
