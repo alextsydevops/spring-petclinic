@@ -3,6 +3,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('alextsydevops-dockerhub-credentials')
         DOCKER_TAG = getDockerTagVersion()
+        DOCKER_HOST_PORT = "8081"
     }
 
     stages {
@@ -27,7 +28,7 @@ pipeline {
         }
         stage('DEPLOY') {
             steps {
-                ansiblePlaybook credentialsId: 'java-spring-app-dev-server', disableHostKeyChecking: true, extras: '-e DOCKER_TAG="${DOCKER_TAG}"', installation: 'Ansible', inventory: 'inventory.inv', playbook: 'deploy-app.yml'
+                ansiblePlaybook credentialsId: 'java-spring-app-dev-server', disableHostKeyChecking: true, extras: '-e DOCKER_TAG="${DOCKER_TAG}" DOCKER_HOST_PORT="${DOCKER_HOST_PORT}"', installation: 'Ansible', inventory: 'inventory.inv', playbook: 'deploy-app.yml'
             }
         }
         }
