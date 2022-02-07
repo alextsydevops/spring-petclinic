@@ -28,14 +28,14 @@ pipeline {
         }
         stage('DEPLOY') {
             steps {
-                ansiblePlaybook credentialsId: 'java-spring-app-dev-server', disableHostKeyChecking: true, extras: '-e DOCKER_TAG="${DOCKER_TAG}" DOCKER_HOST_PORT="${DOCKER_HOST_PORT}"', installation: 'Ansible', inventory: 'inventory.inv', playbook: 'deploy-app.yml'
+                ansiblePlaybook credentialsId: 'java-spring-app-dev-server', disableHostKeyChecking: true, extras: '-e DOCKER_TAG="${DOCKER_TAG}" -e DOCKER_HOST_PORT="${DOCKER_HOST_PORT}"', installation: 'Ansible', inventory: 'inventory.inv', playbook: 'deploy-app.yml'
             }
         }
         }
         post {
             always {
                 sh 'docker logout'
-                sh 'docker image rm alextsydevops/spring-petclinic:${DOCKER_TAG}'
+                sh 'docker image rm alextsydevops/spring-petclinic'
             }
         }
 }
